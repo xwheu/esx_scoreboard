@@ -45,7 +45,7 @@ function AddPlayerToScoreboard(xPlayer, update)
 	connectedPlayers[playerId] = {}
 	connectedPlayers[playerId].ping = GetPlayerPing(playerId)
 	connectedPlayers[playerId].id = playerId
-	connectedPlayers[playerId].name = xPlayer.getName()
+	connectedPlayers[playerId].name = Sanitize(xPlayer.getName())
 	connectedPlayers[playerId].job = xPlayer.job.name
 
 	if update then
@@ -79,14 +79,29 @@ function UpdatePing()
 	TriggerClientEvent('esx_scoreboard:updatePing', -1, connectedPlayers)
 end
 
+function Sanitize(str)
+	local replacements = {
+		['&' ] = '&amp;',
+		['<' ] = '&lt;',
+		['>' ] = '&gt;',
+		['\n'] = '<br/>'
+	}
+
+	return str
+		:gsub('[&<>\n]', replacements)
+		:gsub(' +', function(s)
+			return ' '..('&nbsp;'):rep(#s-1)
+		end)
+end
+
 TriggerEvent('es:addGroupCommand', 'screfresh', 'admin', function(source, args, user)
 	AddPlayersToScoreboard()
 end, function(source, args, user)
 	TriggerClientEvent('chat:addMessage', source, { args = { '^1SYSTEM', 'Insufficient Permissions.' } })
-end, {help = "Refresh esx_scoreboard names!"})
+end, {help = 'Refresh esx_scoreboard names!'})
 
 TriggerEvent('es:addGroupCommand', 'sctoggle', 'admin', function(source, args, user)
 	TriggerClientEvent('esx_scoreboard:toggleID', source)
 end, function(source, args, user)
 	TriggerClientEvent('chat:addMessage', source, { args = { '^1SYSTEM', 'Insufficient Permissions.' } })
-end, {help = "Toggle ID column on the scoreboard!"})
+end, {help = 'Toggle ID column on the scoreboard!'})
